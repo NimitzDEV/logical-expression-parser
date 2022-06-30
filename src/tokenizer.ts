@@ -1,11 +1,10 @@
-const TokenType = require('./token-type');
+import { getTokenTypeByValue, TokenType } from "./token-type";
 
-const Tokenizer = exp => {
-  let literal = '';
-  const tokens = [];
-  for (const char of exp) {
-    const code = char.charCodeAt(0);
-    switch (code) {
+export const Tokenizer = (expression) => {
+  let literal = "";
+  const tokens: { type: TokenType; value: string }[] = [];
+  for (const char of expression) {
+    switch (char) {
       case TokenType.PAR_OPEN:
       case TokenType.PAR_CLOSE:
       case TokenType.OP_NOT:
@@ -14,14 +13,14 @@ const Tokenizer = exp => {
         if (literal) {
           tokens.push({
             type: TokenType.LITERAL,
-            value: literal
+            value: literal,
           });
-          literal = '';
+          literal = "";
         }
 
         tokens.push({
-          type: code,
-          value: char
+          type: getTokenTypeByValue(char),
+          value: char,
         });
         break;
       default:
@@ -32,10 +31,8 @@ const Tokenizer = exp => {
   if (literal)
     tokens.push({
       type: TokenType.LITERAL,
-      value: literal
+      value: literal,
     });
 
   return tokens;
 };
-
-module.exports = Tokenizer;

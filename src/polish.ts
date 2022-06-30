@@ -1,9 +1,11 @@
-const TokenType = require('./token-type');
+import { TokenType } from "./token-type";
 
-const PolishNotation = tokens => {
-  const queue = [];
-  const stack = [];
-  tokens.forEach(token => {
+export type PolishList = { type: TokenType; value: string }[];
+
+export const PolishNotation = (tokens: PolishList) => {
+  const queue: PolishList = [];
+  const stack: PolishList = [];
+  tokens.forEach((token) => {
     switch (token.type) {
       case TokenType.LITERAL:
         queue.unshift(token);
@@ -19,13 +21,15 @@ const PolishNotation = tokens => {
           stack.length &&
           stack[stack.length - 1].type !== TokenType.PAR_OPEN
         ) {
-          queue.unshift(stack.pop());
+          const i = stack.pop();
+          i && queue.unshift(i);
         }
 
         stack.pop();
 
         if (stack.length && stack[stack.length - 1].type === TokenType.OP_NOT) {
-          queue.unshift(stack.pop());
+          const i = stack.pop();
+          i && queue.unshift(i);
         }
         break;
       default:
@@ -38,16 +42,10 @@ const PolishNotation = tokens => {
   return result;
 };
 
-// 波兰列表生成器
-const PolishGenerator = function*(polish) {
+export const PolishGenerator = function* (polish) {
   for (let index = 0; index < polish.length - 1; index++) {
     yield polish[index];
   }
 
   return polish[polish.length - 1];
-};
-
-module.exports = {
-  PolishNotation,
-  PolishGenerator
 };
