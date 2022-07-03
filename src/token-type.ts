@@ -1,21 +1,22 @@
-export enum TokenType {
-  PAR_OPEN = "(",
-  PAR_CLOSE = ")",
-  OP_NOT = "!",
-  BINARY_AND = "&",
-  BINARY_OR = "|",
-  LITERAL = "LITERAL",
-  END = "END",
-  LEAF = "LEAF",
-  ATOMIC = "ATOMIC",
+export enum Token {
+  PARENTHESES_OPEN,
+  PARENTHESES_CLOSE,
+  OPERATOR_NOT,
+  OPERATOR_AND,
+  OPERATOR_OR,
+  LITERAL,
+  END,
+  LEAF,
+  ATOMIC,
 }
 
-export function getTokenTypeByValue(value: string): TokenType {
-  const indexOfS = Object.values(TokenType).indexOf(
-    value as unknown as TokenType
-  );
+export function getTokenTypeByValue(value: string, tokenList: Map<Token, string>): Token {
 
-  const key = Object.keys(TokenType)[indexOfS];
+  for (const val of Array.from(tokenList.entries())) {
+    if (val[1] === value) {
+      return val[0] as Token
+    }
+  }
 
-  return key as TokenType;
+  return Token.LITERAL;
 }

@@ -1,25 +1,27 @@
-import { getTokenTypeByValue, TokenType } from "./token-type";
+import { getTokenTypeByValue, Token } from "./token-type";
 
-export const Tokenizer = (expression) => {
+export const Tokenizer = (expression, customTokens: Map<Token, string>) => {
   let literal = "";
-  const tokens: { type: TokenType; value: string }[] = [];
+  const tokens: { type: Token; value: string }[] = [];
   for (const char of expression) {
-    switch (char) {
-      case TokenType.PAR_OPEN:
-      case TokenType.PAR_CLOSE:
-      case TokenType.OP_NOT:
-      case TokenType.BINARY_AND:
-      case TokenType.BINARY_OR:
+    const token: Token = getTokenTypeByValue(char, customTokens)
+    switch (token) {
+      case Token.PARENTHESES_OPEN:
+      case Token.PARENTHESES_OPEN:
+      case Token.PARENTHESES_CLOSE:
+      case Token.OPERATOR_NOT:
+      case Token.OPERATOR_AND:
+      case Token.OPERATOR_OR:
         if (literal) {
           tokens.push({
-            type: TokenType.LITERAL,
+            type: Token.LITERAL,
             value: literal,
           });
           literal = "";
         }
 
         tokens.push({
-          type: getTokenTypeByValue(char),
+          type: token,
           value: char,
         });
         break;
@@ -30,7 +32,7 @@ export const Tokenizer = (expression) => {
 
   if (literal)
     tokens.push({
-      type: TokenType.LITERAL,
+      type: Token.LITERAL,
       value: literal,
     });
 

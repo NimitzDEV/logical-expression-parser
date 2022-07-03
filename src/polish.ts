@@ -1,25 +1,27 @@
-import { TokenType } from "./token-type";
+import { getTokenTypeByValue, Token } from "./token-type";
 
-export type PolishList = { type: TokenType; value: string }[];
+export type PolishList = { type: Token; value: string }[];
 
-export const PolishNotation = (tokens: PolishList) => {
+export const PolishNotation = (tokens: PolishList, customTokens: Map<Token, string>) => {
   const queue: PolishList = [];
   const stack: PolishList = [];
   tokens.forEach((token) => {
-    switch (token.type) {
-      case TokenType.LITERAL:
+
+    const type: Token = getTokenTypeByValue(token.value, customTokens);
+    switch (type) {
+      case Token.LITERAL:
         queue.unshift(token);
         break;
-      case TokenType.BINARY_AND:
-      case TokenType.BINARY_OR:
-      case TokenType.OP_NOT:
-      case TokenType.PAR_OPEN:
+      case Token.OPERATOR_AND:
+      case Token.OPERATOR_OR:
+      case Token.OPERATOR_NOT:
+      case Token.PARENTHESES_OPEN:
         stack.push(token);
         break;
-      case TokenType.PAR_CLOSE:
+      case Token.PARENTHESES_CLOSE:
         while (
           stack.length &&
-          stack[stack.length - 1].type !== TokenType.PAR_OPEN
+          stack[stack.length - 1].type !== Token.PARENTHESES_OPEN
         ) {
           const i = stack.pop();
           i && queue.unshift(i);
@@ -27,7 +29,7 @@ export const PolishNotation = (tokens: PolishList) => {
 
         stack.pop();
 
-        if (stack.length && stack[stack.length - 1].type === TokenType.OP_NOT) {
+        if (stack.length && stack[stack.length - 1].type === Token.OPERATOR_NOT) {
           const i = stack.pop();
           i && queue.unshift(i);
         }

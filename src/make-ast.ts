@@ -1,26 +1,26 @@
-import { TokenType } from "./token-type";
+import { Token } from "./token-type";
 import { Node } from "./node";
 
 export const make = (gen: Generator): Node | undefined => {
   const data: any = gen.next().value;
 
   switch (data.type) {
-    case TokenType.LITERAL:
-      return { op: TokenType.LEAF, literal: data.value };
+    case Token.LITERAL:
+      return { op: Token.LEAF, literal: data.value };
 
-    case TokenType.OP_NOT:
-      return { op: TokenType.OP_NOT, left: make(gen) };
+    case Token.OPERATOR_NOT:
+      return { op: Token.OPERATOR_NOT, left: make(gen) };
 
-    case TokenType.BINARY_AND:
+    case Token.OPERATOR_AND:
       return {
-        op: TokenType.BINARY_AND,
+        op: Token.OPERATOR_AND,
         left: make(gen),
         right: make(gen),
       };
 
-    case TokenType.BINARY_OR:
+    case Token.OPERATOR_OR:
       return {
-        op: TokenType.BINARY_OR,
+        op: Token.OPERATOR_OR,
         left: make(gen),
         right: make(gen),
       };
