@@ -5,5 +5,20 @@
   "main": "index.js",
   "author": "NimitzDEV",
   "license": "MIT",
-  "types": "index.d.ts"
+  "types": "index.d.ts",
+  "keywords": [
+    "parser",
+    "expression parser",
+    "logical expression parser",
+    "logical flags parser",
+    "flags"
+  ],
+  "homepage": "https://github.com/NimitzDEV/logical-expression-parser#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NimitzDEV/logical-expression-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NimitzDEV/logical-expression-parser/issues"
+  }
 }
