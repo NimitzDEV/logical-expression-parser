@@ -1,4 +1,7 @@
 # Logical Expression Parser
+
+[![npm version](https://badge.fury.io/js/logical-expression-parser.svg)](https://badge.fury.io/js/logical-expression-parser)
+
 This is a logical expression parser for JavaScript, it can parse a logical expression into a AST object and evaluates the result using your token checking function.
 
 ## Supported logical operators

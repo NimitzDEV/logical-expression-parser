@@ -1,8 +1,9 @@
 {
   "name": "logical-expression-parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Logical expression parser and evaluates result, suitable for permissions management",
   "main": "index.js",
   "author": "NimitzDEV",
-  "license": "MIT"
+  "license": "MIT",
+  "types": "index.d.ts"
 }
