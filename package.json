@@ -1,6 +1,6 @@
 {
   "name": "logical-expression-parser",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Logical expression parser and evaluates result, suitable for permissions management",
   "main": "index.js",
   "author": "NimitzDEV",
