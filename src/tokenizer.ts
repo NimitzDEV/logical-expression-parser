@@ -8,17 +8,27 @@ export interface Token {
   readonly offset: number;
 }
 
-const OPERATOR_TYPES: Record<string, Exclude<TokenType, 'literal'>> = {
-  '(': 'lparen',
-  ')': 'rparen',
-  '!': 'not',
-  '&': 'and',
-  '|': 'or',
+const getTokenType = (text: string): TokenType => {
+  switch (text) {
+    case '(':
+      return 'lparen';
+    case ')':
+      return 'rparen';
+    case '!':
+      return 'not';
+    case '&':
+      return 'and';
+    case '|':
+      return 'or';
+    default:
+      return 'literal';
+  }
 };
 
 // whitespace | single-char operator | literal run (the /u flag keeps
 // surrogate pairs such as emoji intact inside literal runs)
-const TOKEN_PATTERN = /\s+|[!&|()]|[^!&|()\s]+/g;
+const TOKEN_PATTERN = /\s+|[!&|()]|[^!&|()\s]+/gu;
+const WHITESPACE_PATTERN = /^\s+$/;
 
 export const tokenize = (expression: string): Token[] => {
   const tokens: Token[] = [];
@@ -29,11 +39,11 @@ export const tokenize = (expression: string): Token[] => {
     match = TOKEN_PATTERN.exec(expression)
   ) {
     const text = match[0];
-    if (/^\s+$/.test(text)) {
+    if (WHITESPACE_PATTERN.test(text)) {
       continue;
     }
     tokens.push({
-      type: OPERATOR_TYPES[text] ?? 'literal',
+      type: getTokenType(text),
       value: text,
       offset: match.index,
     });

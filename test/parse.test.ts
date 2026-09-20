@@ -102,6 +102,18 @@ test('literals may contain unicode and emoji', () => {
   assert.equal(parse('🚀|A', truthy('🚀')), true);
 });
 
+test('literals matching Object.prototype properties parse correctly', () => {
+  const objectProps = ['toString', 'valueOf', 'constructor', 'hasOwnProperty', '__proto__'];
+  for (const prop of objectProps) {
+    assert.equal(parse(prop, token => token === prop), true, `literal ${prop}`);
+    assert.equal(
+      parse(`A&${prop}`, token => token === 'A' || token === prop),
+      true,
+      `composite with ${prop}`,
+    );
+  }
+});
+
 test('checker receives the exact literal text', () => {
   const seen: string[] = [];
   parse('A & B', token => {

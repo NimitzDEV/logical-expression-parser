@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # npm provenance (OIDC)
+  id-token: write # Required for npm OIDC trusted publishing & provenance
 
 jobs:
   publish:
@@ -17,11 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
+      - name: Ensure npm 11+ for trusted publishing
+        run: npm install -g npm@latest
       - run: npm ci
       - name: Verify tag matches package.json version
         run: node scripts/verify-release-tag.mjs
       - run: npm test
       - run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

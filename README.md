@@ -110,4 +110,4 @@ Releases publish to npm from GitHub Actions when a `v`-tag is pushed:
 
 1. Bump `version` in `package.json` and commit.
 2. `git tag v<version> && git push origin v<version>` — the tag must match `version` exactly (enforced by the workflow).
-3. The workflow builds, runs the full test suite, and publishes with provenance. It requires the `NPM_TOKEN` secret (an npm automation/granular token) in the repository settings.
+3. The workflow builds, runs the full test suite, and publishes with provenance using npm Trusted Publishing (OIDC keyless publishing; configure your repository once under Package Settings → Trusted Publishing on npmjs.com).
