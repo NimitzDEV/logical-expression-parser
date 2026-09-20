@@ -6,13 +6,17 @@
   "author": "NimitzDEV",
   "sideEffects": false,
   "keywords": [
-    "parser",
+    "ast",
+    "conditional",
+    "evaluator",
     "expression parser",
+    "expression",
+    "flags",
     "logical expression parser",
     "logical flags parser",
-    "flags",
-    "typescript",
-    "ast"
+    "logical",
+    "parser",
+    "tokenizer"
   ],
   "homepage": "https://github.com/NimitzDEV/logical-expression-parser#readme",
   "repository": {
