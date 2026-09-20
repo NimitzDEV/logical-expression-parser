@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write # Required for npm OIDC trusted publishing & provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Ensure npm 11+ for trusted publishing
+        run: npm install -g npm@latest
+      - run: npm ci
+      - name: Verify tag matches package.json version
+        run: node scripts/verify-release-tag.mjs
+      - run: npm test
+      - run: npm publish --provenance
