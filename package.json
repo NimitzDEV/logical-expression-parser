@@ -1,17 +1,18 @@
 {
   "name": "logical-expression-parser",
-  "version": "1.0.2",
-  "description": "Logical expression parser and evaluates result, suitable for permissions management",
-  "main": "index.js",
-  "author": "NimitzDEV",
+  "version": "2.0.0",
+  "description": "Logical expression parser and evaluator, suitable for permissions management",
   "license": "MIT",
-  "types": "index.d.ts",
+  "author": "NimitzDEV",
+  "sideEffects": false,
   "keywords": [
     "parser",
     "expression parser",
     "logical expression parser",
     "logical flags parser",
-    "flags"
+    "flags",
+    "typescript",
+    "ast"
   ],
   "homepage": "https://github.com/NimitzDEV/logical-expression-parser#readme",
   "repository": {
@@ -20,5 +21,36 @@
   },
   "bugs": {
     "url": "https://github.com/NimitzDEV/logical-expression-parser/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/cjs/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm && npm run build:markers",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:markers": "node scripts/write-package-markers.mjs",
+    "build:test": "tsc -p tsconfig.test.json",
+    "test": "npm run build && npm run build:test && c8 node --test \"test-build/test/*.test.js\" && npm run smoke",
+    "smoke": "node scripts/smoke.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "c8": "^12.0.0",
+    "typescript": "^7.0.2"
   }
 }

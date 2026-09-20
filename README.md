@@ -2,30 +2,112 @@
 
 [![npm version](https://badge.fury.io/js/logical-expression-parser.svg)](https://badge.fury.io/js/logical-expression-parser)
 
-This is a logical expression parser for JavaScript, it can parse a logical expression into a AST object and evaluates the result using your token checking function.
+Parses logical expressions like `REGISTED&(SPECIAL|INVITED)` into an AST and evaluates them with your own token checker. Suitable for permissions management. Written in TypeScript, zero runtime dependencies, ships both CommonJS and ESM builds.
 
-## Supported logical operators
-1. `|` Or
-1. `&` And
-1. `!` Not
-1. `()` Parentheses
+## Supported operators
+
+| Operator | Meaning  | Precedence |
+| -------- | -------- | ---------- |
+| `!`      | Not      | highest    |
+| `&`      | And      | middle     |
+| `\|`     | Or       | lowest     |
+| `(...)`  | Grouping | —          |
+
+- `&` binds tighter than `|`: `A&B|C` means `(A&B)|C`.
+- `&` and `|` are left-associative.
+- Whitespace between tokens is ignored.
+- Literals are any runs of characters other than whitespace and the operators above (unicode included).
 
 ## How it works
-1. The parser parse and tokenize the expression, for example one of your function requires `REGISTED&(SPECIAL|INVITED)`
-1. Parser then will pass `REGISTED`, `SPECIAL` and `INVITED` into your token checking function to get a boolean result
-1. Finaly the parser will evaluates the final result
 
-## Example
+1. You require permissions such as `REGISTED&(SPECIAL|INVITED)`.
+2. The parser builds an AST and passes each literal (`REGISTED`, `SPECIAL`, `INVITED`) to your token checking function.
+3. The AST is evaluated with short-circuiting, so your checker is only called for tokens that can still change the result.
+
+## Example (CommonJS)
+
 ```javascript
-const LEP = require('logical-expression-parser');
+const { parse } = require('logical-expression-parser');
 
 const REQUIREMENTS = 'REGISTED&(SPECIAL|INVITED)';
 const LIST_A = ['REGISTED', 'INVITED'];
 const LIST_B = ['SPECIAL', 'EXPERT'];
 
-const RESULT_A = LEP.parse(REQUIREMENTS, t => LIST_A.indexOf(t) > -1);
-const RESULT_B = LEP.parse(REQUIREMENTS, t => LIST_B.indexOf(t) > -1);
+const RESULT_A = parse(REQUIREMENTS, token => LIST_A.includes(token));
+const RESULT_B = parse(REQUIREMENTS, token => LIST_B.includes(token));
 
 // RESULT_A: true
 // RESULT_B: false
 ```
+
+## Example (ESM)
+
+```javascript
+import { parse } from 'logical-expression-parser';
+// same as above
+```
+
+## AST API
+
+```javascript
+import { parseAst, evaluate } from 'logical-expression-parser';
+
+const ast = parseAst('REGISTED&!(BANNED)');
+// {
+//   type: 'and',
+//   left: { type: 'literal', value: 'REGISTED' },
+//   right: { type: 'not', operand: { type: 'literal', value: 'BANNED' } }
+// }
+
+const allowed = evaluate(ast, token => userPermissions.includes(token));
+```
+
+## Types
+
+```typescript
+export type TokenChecker = (token: string) => boolean;
+
+export type LiteralNode = { readonly type: 'literal'; readonly value: string };
+export type NotNode = { readonly type: 'not'; readonly operand: AstNode };
+export type BinaryNode = {
+  readonly type: 'and' | 'or';
+  readonly left: AstNode;
+  readonly right: AstNode;
+};
+export type AstNode = LiteralNode | NotNode | BinaryNode;
+```
+
+## Errors
+
+Malformed input — empty expressions, `A&`, `&A`, `()`, unbalanced parentheses, stray tokens — throws `LEPSyntaxError`, a `SyntaxError` subclass carrying the character offset:
+
+```javascript
+import { parse, LEPSyntaxError } from 'logical-expression-parser';
+
+try {
+  parse('A&(B|C', checker);
+} catch (error) {
+  if (error instanceof LEPSyntaxError) {
+    // error.offset === 6
+  }
+}
+```
+
+## Development
+
+Requires Node >= 18.
+
+```sh
+npm install
+npm test   # builds dist/, compiles tests, runs node --test with a c8 coverage report, smoke-checks both dist builds
+```
+
+Sources live in `src/`, tests in `test/`; `npm run build` emits `dist/cjs` and `dist/esm`.
+
+## Releasing
+
+Releases publish to npm from GitHub Actions when a `v`-tag is pushed:
+
+1. Bump `version` in `package.json` and commit.
+2. `git tag v<version> && git push origin v<version>` — the tag must match `version` exactly (enforced by the workflow).
+3. The workflow builds, runs the full test suite, and publishes with provenance. It requires the `NPM_TOKEN` secret (an npm automation/granular token) in the repository settings.
