@@ -1,6 +1,6 @@
 {
   "name": "logical-expression-parser",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Logical expression parser and evaluator, suitable for permissions management",
   "license": "MIT",
   "author": "NimitzDEV",
