@@ -17,9 +17,16 @@ for (const [label, mod] of [
   ['cjs', cjs],
 ]) {
   assert.equal(typeof mod.parse, 'function', `${label}: parse export`);
+  assert.equal(typeof mod.parseAsync, 'function', `${label}: parseAsync export`);
   assert.equal(typeof mod.parseAst, 'function', `${label}: parseAst export`);
   assert.equal(typeof mod.evaluate, 'function', `${label}: evaluate export`);
+  assert.equal(typeof mod.evaluateAsync, 'function', `${label}: evaluateAsync export`);
   assert.equal(mod.parse('A&(B|C)', t => t === 'A' || t === 'C'), true, `${label}: evaluation`);
+  assert.equal(
+    await mod.parseAsync('A&(B|C)', async t => t === 'A' || t === 'C'),
+    true,
+    `${label}: async evaluation`,
+  );
   assert.equal(mod.parse('!(A&B)', t => t === 'A'), true, `${label}: NOT semantics`);
   assert.equal(mod.parse('A&B|C', t => t === 'C'), true, `${label}: precedence`);
   assert.deepEqual(

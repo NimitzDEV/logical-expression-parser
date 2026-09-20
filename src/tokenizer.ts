@@ -32,12 +32,7 @@ const WHITESPACE_PATTERN = /^\s+$/;
 
 export const tokenize = (expression: string): Token[] => {
   const tokens: Token[] = [];
-  TOKEN_PATTERN.lastIndex = 0;
-  for (
-    let match = TOKEN_PATTERN.exec(expression);
-    match !== null;
-    match = TOKEN_PATTERN.exec(expression)
-  ) {
+  for (const match of expression.matchAll(TOKEN_PATTERN)) {
     const text = match[0];
     if (WHITESPACE_PATTERN.test(text)) {
       continue;
@@ -45,7 +40,7 @@ export const tokenize = (expression: string): Token[] => {
     tokens.push({
       type: getTokenType(text),
       value: text,
-      offset: match.index,
+      offset: match.index!,
     });
   }
   return tokens;

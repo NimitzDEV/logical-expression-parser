@@ -158,3 +158,33 @@ test('evaluation short-circuits', () => {
   assert.equal(parse('!A|B', aTrueRestFalse), false);
   assert.deepEqual(seen, ['A', 'B']);
 });
+
+test('parseAsync evaluates expressions with async checkers', async () => {
+  const { parseAsync } = await import('../src/index.js');
+  const userRoles = new Set(['ADMIN', 'BETA_TESTER']);
+  const asyncChecker = async (role: string): Promise<boolean> => {
+    await new Promise(resolve => setImmediate(resolve));
+    return userRoles.has(role);
+  };
+
+  assert.equal(await parseAsync('ADMIN & BETA_TESTER', asyncChecker), true);
+  assert.equal(await parseAsync('ADMIN & SUPERUSER', asyncChecker), false);
+  assert.equal(await parseAsync('!SUPERUSER & (ADMIN | GUEST)', asyncChecker), true);
+});
+
+test('parseAsync propagates syntax and type errors as rejections', async () => {
+  const { parseAsync } = await import('../src/index.js');
+  await assert.rejects(async () => parseAsync('A&', async () => true), SyntaxError);
+  // @ts-expect-error test invalid expression type
+  await assert.rejects(async () => parseAsync(123, async () => true), TypeError);
+});
+
+test('concurrent and interleaved evaluations are stateless', async () => {
+  const { parseAsync } = await import('../src/index.js');
+  const results = await Promise.all([
+    parseAsync('A & B', async t => t === 'A' || t === 'B'),
+    parseAsync('C | D', async t => t === 'D'),
+    parseAsync('!E & F', async t => t === 'F'),
+  ]);
+  assert.deepEqual(results, [true, true, true]);
+});

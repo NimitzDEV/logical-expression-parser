@@ -62,10 +62,25 @@ const ast = parseAst('REGISTED&!(BANNED)');
 const allowed = evaluate(ast, token => userPermissions.includes(token));
 ```
 
+## Async Evaluation
+
+For permission checks requiring database or network calls, use `parseAsync` or `evaluateAsync`:
+
+```javascript
+import { parseAsync } from 'logical-expression-parser';
+
+const allowed = await parseAsync('ADMIN | (SPECIAL & !BANNED)', async token => {
+  return await checkUserPermission(userId, token);
+});
+```
+
+Like the synchronous API, evaluation short-circuits so subsequent async checks are skipped once the outcome is determined.
+
 ## Types
 
 ```typescript
 export type TokenChecker = (token: string) => boolean;
+export type AsyncTokenChecker = (token: string) => boolean | Promise<boolean>;
 
 export type LiteralNode = { readonly type: 'literal'; readonly value: string };
 export type NotNode = { readonly type: 'not'; readonly operand: AstNode };
@@ -79,7 +94,7 @@ export type AstNode = LiteralNode | NotNode | BinaryNode;
 
 ## Errors
 
-Malformed input — empty expressions, `A&`, `&A`, `()`, unbalanced parentheses, stray tokens — throws `LEPSyntaxError`, a `SyntaxError` subclass carrying the character offset:
+Malformed expressions — empty inputs, `A&`, `&A`, `()`, unbalanced parentheses, stray tokens — throw `LEPSyntaxError`, a `SyntaxError` subclass carrying the character offset. Invalid argument types (e.g. non-string expression or non-function checker) throw `TypeError`.
 
 ```javascript
 import { parse, LEPSyntaxError } from 'logical-expression-parser';

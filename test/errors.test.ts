@@ -76,3 +76,16 @@ test('error message reports the offset', () => {
       error instanceof SyntaxError && error.message.endsWith('at offset 1)'),
   );
 });
+
+test('runtime argument validation throws TypeError', async () => {
+  // @ts-expect-error test invalid expression type
+  assert.throws(() => parseAst(null), TypeError);
+  // @ts-expect-error test invalid expression type
+  assert.throws(() => parseAst(123), TypeError);
+  // @ts-expect-error test invalid expression type
+  assert.throws(() => parse(undefined, () => true), TypeError);
+  // @ts-expect-error test invalid checker type
+  assert.throws(() => parse('A', null), TypeError);
+  // @ts-expect-error test invalid checker type
+  assert.throws(() => parse('A', 'not-a-fn'), TypeError);
+});

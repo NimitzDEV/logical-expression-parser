@@ -73,3 +73,47 @@ test('parse(expression, checker) equals evaluate(parseAst(expression), checker)'
     );
   }
 });
+
+test('evaluateAsync consumes a parsed AST with async checkers', async () => {
+  const { evaluateAsync } = await import('../src/index.js');
+  const ast: AstNode = parseAst('REGISTED&!(BANNED)');
+  const asyncChecker = async (token: string): Promise<boolean> => {
+    await new Promise(resolve => setImmediate(resolve));
+    return token === 'REGISTED';
+  };
+  assert.equal(await evaluateAsync(ast, asyncChecker), true);
+  assert.equal(
+    await evaluateAsync(ast, async token => ['REGISTED', 'BANNED'].includes(token)),
+    false,
+  );
+});
+
+test('evaluateAsync short-circuits like evaluate', async () => {
+  const { evaluateAsync } = await import('../src/index.js');
+  const seen: string[] = [];
+  const checker = (result: boolean) => async (token: string): Promise<boolean> => {
+    seen.push(token);
+    return result;
+  };
+
+  seen.length = 0;
+  assert.equal(await evaluateAsync(parseAst('A|B'), checker(true)), true);
+  assert.deepEqual(seen, ['A']);
+
+  seen.length = 0;
+  assert.equal(await evaluateAsync(parseAst('A&B'), checker(false)), false);
+  assert.deepEqual(seen, ['A']);
+});
+
+test('evaluate and evaluateAsync throw TypeError on non-function checker', async () => {
+  const { evaluateAsync } = await import('../src/index.js');
+  const ast = parseAst('A');
+  // @ts-expect-error test invalid checker
+  assert.throws(() => evaluate(ast, null), TypeError);
+  // @ts-expect-error test invalid checker
+  assert.throws(() => evaluate(ast, 'not-a-fn'), TypeError);
+  // @ts-expect-error test invalid checker
+  await assert.rejects(async () => evaluateAsync(ast, null), TypeError);
+  // @ts-expect-error test invalid checker
+  await assert.rejects(async () => evaluateAsync(ast, 'not-a-fn'), TypeError);
+});
