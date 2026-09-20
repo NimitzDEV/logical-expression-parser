@@ -52,7 +52,7 @@
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:markers": "node scripts/write-package-markers.mjs",
     "build:test": "tsc -p tsconfig.test.json",
-    "test": "npm run build && npm run build:test && c8 node --test test-build/test/ast.test.js test-build/test/errors.test.js test-build/test/parse.test.js && npm run smoke",
+    "test": "npm run build && npm run build:test && c8 node --test test-build/test/ast.test.js test-build/test/errors.test.js test-build/test/parse.test.js test-build/test/custom-operators.test.js && npm run smoke",
     "smoke": "node scripts/smoke.mjs",
     "prepublishOnly": "npm test"
   },

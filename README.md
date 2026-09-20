@@ -76,6 +76,52 @@ const allowed = await parseAsync('ADMIN | (SPECIAL & !BANNED)', async token => {
 
 Like the synchronous API, evaluation short-circuits so subsequent async checks are skipped once the outcome is determined.
 
+## Custom Operators
+
+You can register custom binary and prefix unary operators with their own precedence, associativity, and evaluation logic using `createParser`:
+
+```javascript
+import { createParser } from 'logical-expression-parser';
+
+const parser = createParser({
+  customOperators: [
+    {
+      kind: 'binary',
+      symbol: '^',
+      precedence: 15, // between OR (10) and AND (20)
+      associativity: 'left',
+      evaluate: (left, right) => left !== right(),
+      evaluateAsync: async (left, right) => left !== (await right()),
+    },
+    {
+      kind: 'binary',
+      symbol: '->',
+      precedence: 5, // looser than OR
+      associativity: 'right',
+      // Short-circuiting: if left is false, right() is skipped
+      evaluate: (left, right) => (!left ? true : right()),
+      evaluateAsync: async (left, right) => (!left ? true : await right()),
+    },
+    {
+      kind: 'prefix',
+      symbol: '~',
+      precedence: 30, // same as '!'
+      evaluate: operand => !operand,
+      evaluateAsync: async operand => !(await operand),
+    },
+  ],
+});
+
+const allowed = parser.parse('ADMIN ^ (USER -> BETA)', checker);
+```
+
+### Built-in Precedence Reference
+- `|` (OR): `10`
+- `&` (AND): `20`
+- `!` (NOT): `30`
+
+Word operators (e.g. `XOR`, `NAND`) are also supported with word-boundary safety (they won't split literals like `XOR_GATE`).
+
 ## Types
 
 ```typescript
@@ -89,7 +135,23 @@ export type BinaryNode = {
   readonly left: AstNode;
   readonly right: AstNode;
 };
-export type AstNode = LiteralNode | NotNode | BinaryNode;
+export type CustomBinaryNode = {
+  readonly type: 'custom_binary';
+  readonly operator: string;
+  readonly left: AstNode;
+  readonly right: AstNode;
+};
+export type CustomUnaryNode = {
+  readonly type: 'custom_unary';
+  readonly operator: string;
+  readonly operand: AstNode;
+};
+export type AstNode =
+  | LiteralNode
+  | NotNode
+  | BinaryNode
+  | CustomBinaryNode
+  | CustomUnaryNode;
 ```
 
 ## Errors

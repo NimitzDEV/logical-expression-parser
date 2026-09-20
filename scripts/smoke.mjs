@@ -27,6 +27,18 @@ for (const [label, mod] of [
     true,
     `${label}: async evaluation`,
   );
+  assert.equal(typeof mod.createParser, 'function', `${label}: createParser export`);
+  const customParser = mod.createParser({
+    customOperators: [
+      {
+        kind: 'binary',
+        symbol: '^',
+        precedence: 15,
+        evaluate: (l, r) => l !== r(),
+      },
+    ],
+  });
+  assert.equal(customParser.parse('A ^ B', t => t === 'A'), true, `${label}: custom operator`);
   assert.equal(mod.parse('!(A&B)', t => t === 'A'), true, `${label}: NOT semantics`);
   assert.equal(mod.parse('A&B|C', t => t === 'C'), true, `${label}: precedence`);
   assert.deepEqual(
